@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<rect width="512" height="512" rx="102" fill="#071a3c"/>
+<rect x="92" y="92" width="327" height="327" rx="61" fill="#1769e8"/>
+<text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" font-family="Arial,sans-serif" font-size="133" font-weight="700" fill="white">ADM</text>
+</svg>

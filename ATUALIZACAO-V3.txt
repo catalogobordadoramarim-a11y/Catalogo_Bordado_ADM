@@ -1,0 +1,11 @@
+Catálogo Bordado ADM — V3
+
+Correções:
+1. Modelo já cadastrado fica bloqueado na importação Excel.
+2. Importação em lote ignora modelos existentes e informa quais foram bloqueados.
+3. Novo cadastro manual também não pode duplicar um modelo existente.
+4. Atualização pela tela Fichas > Atualizar continua permitida.
+5. Tempo médio entre modelos agora mostra segundos, minutos, horas ou dias em vez de "agora" quando o intervalo é menor que 1 hora.
+6. Cache PWA atualizado para v5.
+
+Observação: um modelo que já tenha sido sobrescrito antes desta versão não é restaurado automaticamente.

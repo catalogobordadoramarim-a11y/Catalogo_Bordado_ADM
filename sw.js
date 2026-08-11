@@ -1,4 +1,4 @@
-const CACHE = "catalogo-bordado-v4";
+const CACHE = "catalogo-bordado-v5";
 const CORE = ["./", "./index.html", "./manifest.webmanifest", "./js/services.js", "./js/firebase-config.js", "./js/cloudinary-config.js"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(CORE)));

@@ -95,12 +95,15 @@ async function listPublishedModels(){
   const snap=await fb.fsMod.getDocs(q);
   return snap.docs.map(fromDoc).sort((a,b)=>normalizeCode(a.code).localeCompare(normalizeCode(b.code),undefined,{numeric:true}));
 }
-async function saveModel(model){
+async function saveModel(model,options={}){
   await requireAdmin();
   const fb=await getFirebase();
   const code=normalizeCode(model.codigo || model.code); if(!code) throw new Error("Modelo sem código.");
   const ref=fb.fsMod.doc(fb.db,"fichas",code);
   const existing=await fb.fsMod.getDoc(ref);
+  if(existing.exists() && options.allowOverwrite === false){
+    throw new Error(`Modelo ${code} já cadastrado. Use Atualizar para alterar a ficha existente.`);
+  }
   const payload={
     codigo:code,
     linha:model.linha || model.line || lineFromModel(code),

@@ -65,6 +65,23 @@ async function requireAdmin(){
   return {user:fb.auth.currentUser,profile};
 }
 
+
+function userStatus(x){if(x.role==="admin")return "Administrador";if(x.ativo===true)return "Aprovado";if(x.status==="recusado")return "Recusado";return "Pendente";}
+async function listUsers(){
+  await requireAdmin();
+  const fb=await getFirebase();
+  const snap=await fb.fsMod.getDocs(fb.fsMod.collection(fb.db,"usuarios"));
+  return snap.docs.map(d=>{const x=d.data();return {uid:d.id,nome:x.nome||"",email:x.email||"",role:x.role||"cliente",ativo:x.ativo===true,status:x.status||"",displayStatus:userStatus(x),dataSolicitacao:toIso(x.dataSolicitacao),dataAprovacao:toIso(x.dataAprovacao)};}).sort((a,b)=>{if(a.displayStatus!==b.displayStatus)return a.displayStatus.localeCompare(b.displayStatus);return (a.nome||a.email).localeCompare(b.nome||b.email);});
+}
+async function approveUser(uid){
+  await requireAdmin();const fb=await getFirebase();
+  await fb.fsMod.setDoc(fb.fsMod.doc(fb.db,"usuarios",uid),{role:"cliente",ativo:true,status:"aprovado",dataAprovacao:fb.fsMod.serverTimestamp(),dataAtualizacao:fb.fsMod.serverTimestamp()},{merge:true});
+}
+async function rejectUser(uid){
+  await requireAdmin();const fb=await getFirebase();
+  await fb.fsMod.setDoc(fb.fsMod.doc(fb.db,"usuarios",uid),{role:"cliente",ativo:false,status:"recusado",dataAtualizacao:fb.fsMod.serverTimestamp()},{merge:true});
+}
+
 async function listAllModels(){
   await requireAdmin();
   const fb=await getFirebase();
@@ -121,4 +138,4 @@ async function uploadImage(file,modelCode=""){
   return {url:json.secure_url,publicId:json.public_id,width:json.width,height:json.height,bytes:json.bytes};
 }
 
-export const appServices={firebaseReady,cloudinaryReady,listAllModels,listPublishedModels,saveModel,deleteModel,uploadImage,login,logout,resetPassword,onAuthChanged,getUserProfile,requireAdmin,normalizeCode,lineFromModel};
+export const appServices={firebaseReady,cloudinaryReady,listAllModels,listPublishedModels,listUsers,approveUser,rejectUser,saveModel,deleteModel,uploadImage,login,logout,resetPassword,onAuthChanged,getUserProfile,requireAdmin,normalizeCode,lineFromModel};

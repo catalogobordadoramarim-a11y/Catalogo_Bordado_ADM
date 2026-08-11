@@ -17,6 +17,9 @@
 
 /* V10 ajustes */
 .removeStageBtn{border:1px solid #f0b8b8;background:#fff;color:#c62828;border-radius:10px;padding:8px 11px;font-weight:700;cursor:pointer;font-size:12px}.removeStageBtn:hover{background:#fff5f5}.stageTitleActions{display:flex;align-items:center;gap:10px}.metaStageTitle{display:flex;align-items:center;justify-content:space-between;gap:12px}.metaStageMachine{margin-left:auto;text-align:right;font:inherit;font-weight:700;color:#1769e8;text-transform:uppercase;letter-spacing:0}.metaStageSimple.hiddenZero{display:none}
+
+.authGate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#061735,#0a2d63 58%,#1769e8);display:grid;place-items:center;padding:22px}.authGate.hidden{display:none}.authCard{width:min(430px,100%);background:#fff;border-radius:22px;padding:28px;box-shadow:0 28px 80px rgba(0,0,0,.28)}.authBrand{display:flex;align-items:center;gap:12px;margin-bottom:22px}.authLogo{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#1769e8,#18a7ff);color:#fff;display:grid;place-items:center;font-size:23px;font-weight:900}.authCard h2{margin:0;font-size:22px}.authCard p{margin:5px 0 0;color:#728097;font-size:13px}.authField{margin-top:14px}.authField label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.05em;font-weight:850;color:#68778e;margin-bottom:6px}.authField input{width:100%;border:1px solid #dbe3ee;border-radius:10px;padding:12px;outline:none}.authField input:focus{border-color:#7bb0f4;box-shadow:0 0 0 3px #1769e813}.authBtn{width:100%;margin-top:18px;border:0;border-radius:11px;padding:12px;background:linear-gradient(135deg,#1468eb,#3188f1);color:#fff;font-weight:850;cursor:pointer}.authBtn:disabled{opacity:.6;cursor:wait}.authLink{display:block;width:100%;border:0;background:none;margin-top:12px;color:#1769e8;font-weight:750;font-size:12px;cursor:pointer}.authMsg{min-height:18px;margin-top:12px;font-size:12px;color:#c94444;text-align:center}.authMsg.good{color:#13835a}.authNote{margin-top:18px;padding-top:14px;border-top:1px solid #edf1f5;color:#8793a7;font-size:10px;text-align:center}.logoutBtn{border:1px solid #d8e0eb;background:#fff;color:#29415f;border-radius:9px;padding:8px 10px;font-size:11px;font-weight:750;cursor:pointer}
+
 </style>
 
 <link rel="manifest" href="manifest.webmanifest">
@@ -26,6 +29,18 @@
 <link rel="apple-touch-icon" href="icons/icon-192.svg">
 </head>
 <body>
+<div class="authGate" id="authGate">
+  <form class="authCard" id="loginForm">
+    <div class="authBrand"><div class="authLogo">CB</div><div><h2>Catálogo Bordado</h2><p>Acesso administrativo</p></div></div>
+    <div class="authField"><label>E-mail</label><input id="loginEmail" type="email" autocomplete="username" required placeholder="seu.email@empresa.com"></div>
+    <div class="authField"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
+    <button class="authBtn" id="loginBtn" type="submit">Entrar no ADM</button>
+    <button class="authLink" id="forgotBtn" type="button">Esqueci minha senha</button>
+    <div class="authMsg" id="authMsg"></div>
+    <div class="authNote">Acesso permitido somente para usuários administradores ativos.</div>
+  </form>
+</div>
+
 <div class="app">
 <aside class="sidebar"><div class="brand"><div class="logo">⚙</div><span>Catálogo Bordado</span></div><nav class="nav">
 <button class="active" data-page="dashboard"><span class="ico">▦</span><span class="label">Dashboard</span></button>
@@ -36,7 +51,7 @@
 <button data-page="machines"><span class="ico">⌘</span><span class="label">Máquinas</span></button>
 <button data-page="mobile"><span class="ico">◉</span><span class="label">Consulta mobile</span></button>
 </nav><div class="sideFoot">Protótipo V6<br>Dados locais • sem Firebase</div></aside>
-<main class="main"><header class="topbar"><h1 id="topTitle">Visão geral</h1><div class="user"><button id="installAppBtn" class="btn soft hidden" type="button">Instalar app</button><div style="text-align:right"><div style="font-size:12px;font-weight:800">Administrador</div><div style="font-size:10px;color:#8290a3">Painel Web</div></div><div class="avatar">A</div></div></header><div class="content">
+<main class="main"><header class="topbar"><h1 id="topTitle">Visão geral</h1><div class="user"><button id="installAppBtn" class="btn soft hidden" type="button">Instalar app</button><div style="text-align:right"><div id="authUserName" style="font-size:12px;font-weight:800">Administrador</div><div id="authUserEmail" style="font-size:10px;color:#8290a3">—</div></div><div class="avatar">A</div><button id="logoutBtn" class="logoutBtn" type="button">Sair</button></div></header><div class="content">
 
 <section class="page active" id="page-dashboard"><div class="crumb">PAINEL / DASHBOARD</div><div class="hero"><div><h2>Central de fichas de etapas</h2><p>Visão gerencial dos modelos cadastrados e da utilização das máquinas.</p></div><div class="actions"><div class="dashFilters"><select id="dashPeriod" class="select"><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="365">Último ano</option><option value="all">Todo o período</option></select></div><button class="btn outline goto" data-page="manual">＋ Nova ficha</button><button class="btn primary goto" data-page="import">⇧ Importar Excel</button></div></div>
 <div class="kpis"><div class="card kpi"><div class="kpiTop"><span>Modelos hoje</span><span class="kpiIcon">◷</span></div><strong id="kpiToday">0</strong><small>cadastrados no dia</small></div><div class="card kpi"><div class="kpiTop"><span>Modelos no mês</span><span class="kpiIcon">▦</span></div><strong id="kpiMonth">0</strong><small>cadastros neste mês</small></div><div class="card kpi"><div class="kpiTop"><span>Modelos no ano</span><span class="kpiIcon">↗</span></div><strong id="kpiYear">0</strong><small>cadastros neste ano</small></div><div class="card kpi"><div class="kpiTop"><span>Sem novo modelo</span><span class="kpiIcon">⌛</span></div><strong style="font-size:22px" id="kpiIdle">—</strong><small>desde o último cadastro</small></div></div>
@@ -136,10 +151,25 @@ window.catalogoServices = appServices;
 window.dispatchEvent(new Event("catalogo-services-ready"));
 </script>
 <script>
+function authMessage(text,good=false){const el=document.getElementById("authMsg");if(!el)return;el.textContent=text||"";el.classList.toggle("good",!!good)}
+function friendlyAuthError(err){const c=String(err?.code||"");if(c.includes("invalid-credential")||c.includes("wrong-password")||c.includes("user-not-found"))return "E-mail ou senha inválidos.";if(c.includes("too-many-requests"))return "Muitas tentativas. Aguarde um pouco e tente novamente.";if(c.includes("network-request-failed"))return "Falha de rede. Verifique sua conexão.";return err?.message||"Não foi possível entrar."}
 window.addEventListener("catalogo-services-ready", async()=>{
   localStorage.removeItem("etapasProV3");
   localStorage.removeItem("etapasLastImport");
-  await reloadFromFirebase();
+  const svc=window.catalogoServices,gate=document.getElementById("authGate"),form=document.getElementById("loginForm"),btn=document.getElementById("loginBtn");
+  form.addEventListener("submit",async e=>{e.preventDefault();authMessage("");btn.disabled=true;try{await svc.login(document.getElementById("loginEmail").value,document.getElementById("loginPassword").value)}catch(err){authMessage(friendlyAuthError(err))}finally{btn.disabled=false}});
+  document.getElementById("forgotBtn").addEventListener("click",async()=>{const email=document.getElementById("loginEmail").value.trim();if(!email){authMessage("Informe seu e-mail primeiro.");return}try{await svc.resetPassword(email);authMessage("E-mail de redefinição enviado.",true)}catch(err){authMessage(friendlyAuthError(err))}});
+  document.getElementById("logoutBtn").addEventListener("click",()=>svc.logout());
+  await svc.onAuthChanged(async user=>{
+    if(!user){gate.classList.remove("hidden");fichas=[];refreshAll();return}
+    try{
+      const profile=await svc.getUserProfile(user.uid);
+      if(!profile||profile.ativo!==true||profile.role!=="admin"){await svc.logout();authMessage("Este usuário não possui acesso administrativo.");return}
+      document.getElementById("authUserName").textContent=profile.nome||"Administrador";
+      document.getElementById("authUserEmail").textContent=user.email||"";
+      gate.classList.add("hidden");authMessage("");await reloadFromFirebase();
+    }catch(err){authMessage("Não foi possível validar a permissão do usuário.");console.error(err)}
+  });
 });
 </script>
 <script>

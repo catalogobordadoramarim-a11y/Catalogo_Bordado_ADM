@@ -12,6 +12,7 @@ async function getFirebase() {
   const app = appMod.initializeApp(firebaseConfig);
   const db = fsMod.getFirestore(app);
   const auth = authMod.getAuth(app);
+  await authMod.setPersistence(auth, authMod.browserLocalPersistence);
   firebaseModules = { app, db, auth, fsMod, authMod };
   return firebaseModules;
 }
@@ -37,19 +38,49 @@ function fromDoc(d){
   };
 }
 
+async function login(email,password){
+  const fb=await getFirebase();
+  if(!fb) throw new Error("Firebase ainda não configurado.");
+  return fb.authMod.signInWithEmailAndPassword(fb.auth,String(email||"").trim(),password);
+}
+async function logout(){ const fb=await getFirebase(); if(fb) return fb.authMod.signOut(fb.auth); }
+async function resetPassword(email){
+  const fb=await getFirebase(); if(!fb) throw new Error("Firebase ainda não configurado.");
+  return fb.authMod.sendPasswordResetEmail(fb.auth,String(email||"").trim());
+}
+async function onAuthChanged(callback){
+  const fb=await getFirebase(); if(!fb){ callback(null); return ()=>{}; }
+  return fb.authMod.onAuthStateChanged(fb.auth,callback);
+}
+async function getUserProfile(uid){
+  const fb=await getFirebase(); if(!fb || !uid) return null;
+  const snap=await fb.fsMod.getDoc(fb.fsMod.doc(fb.db,"usuarios",uid));
+  return snap.exists()?{uid,...snap.data()}:null;
+}
+async function requireAdmin(){
+  const fb=await getFirebase();
+  if(!fb?.auth?.currentUser) throw new Error("Faça login para continuar.");
+  const profile=await getUserProfile(fb.auth.currentUser.uid);
+  if(!profile || profile.ativo!==true || profile.role!=="admin") throw new Error("Usuário sem permissão de administrador.");
+  return {user:fb.auth.currentUser,profile};
+}
+
 async function listAllModels(){
-  const fb=await getFirebase(); if(!fb) return [];
+  await requireAdmin();
+  const fb=await getFirebase();
   const snap=await fb.fsMod.getDocs(fb.fsMod.collection(fb.db,"fichas"));
   return snap.docs.map(fromDoc).sort((a,b)=>normalizeCode(a.code).localeCompare(normalizeCode(b.code),undefined,{numeric:true}));
 }
 async function listPublishedModels(){
-  const fb=await getFirebase(); if(!fb) return [];
+  await requireAdmin();
+  const fb=await getFirebase();
   const q=fb.fsMod.query(fb.fsMod.collection(fb.db,"fichas"),fb.fsMod.where("publicada","==",true));
   const snap=await fb.fsMod.getDocs(q);
   return snap.docs.map(fromDoc).sort((a,b)=>normalizeCode(a.code).localeCompare(normalizeCode(b.code),undefined,{numeric:true}));
 }
 async function saveModel(model){
-  const fb=await getFirebase(); if(!fb) throw new Error("Firebase ainda não configurado.");
+  await requireAdmin();
+  const fb=await getFirebase();
   const code=normalizeCode(model.codigo || model.code); if(!code) throw new Error("Modelo sem código.");
   const ref=fb.fsMod.doc(fb.db,"fichas",code);
   const existing=await fb.fsMod.getDoc(ref);
@@ -71,10 +102,12 @@ async function saveModel(model){
   return payload;
 }
 async function deleteModel(code){
-  const fb=await getFirebase(); if(!fb) throw new Error("Firebase ainda não configurado.");
+  await requireAdmin();
+  const fb=await getFirebase();
   await fb.fsMod.deleteDoc(fb.fsMod.doc(fb.db,"fichas",normalizeCode(code)));
 }
 async function uploadImage(file,modelCode=""){
+  await requireAdmin();
   if(!cloudinaryReady) throw new Error("Cloudinary ainda não configurado.");
   if(!file) throw new Error("Selecione uma imagem.");
   const form=new FormData();
@@ -87,6 +120,5 @@ async function uploadImage(file,modelCode=""){
   if(!response.ok) throw new Error(json?.error?.message || "Falha no upload da imagem.");
   return {url:json.secure_url,publicId:json.public_id,width:json.width,height:json.height,bytes:json.bytes};
 }
-async function login(email,password){ const fb=await getFirebase(); if(!fb) throw new Error("Firebase ainda não configurado."); return fb.authMod.signInWithEmailAndPassword(fb.auth,email,password); }
-async function logout(){ const fb=await getFirebase(); if(fb) return fb.authMod.signOut(fb.auth); }
-export const appServices={firebaseReady,cloudinaryReady,listAllModels,listPublishedModels,saveModel,deleteModel,uploadImage,login,logout,normalizeCode,lineFromModel};
+
+export const appServices={firebaseReady,cloudinaryReady,listAllModels,listPublishedModels,saveModel,deleteModel,uploadImage,login,logout,resetPassword,onAuthChanged,getUserProfile,requireAdmin,normalizeCode,lineFromModel};

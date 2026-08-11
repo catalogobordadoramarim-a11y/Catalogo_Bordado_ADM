@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /fichas/{fichaId} {
+      allow read: if resource.data.publicada == true || request.auth != null;
+      allow create, update, delete: if request.auth != null;
+    }
+  }
+}

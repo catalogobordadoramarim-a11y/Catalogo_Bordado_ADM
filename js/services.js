@@ -19,6 +19,7 @@ async function getFirebase() {
 
 function normalizeCode(value="") { return String(value).replace(/\D/g, ""); }
 function lineFromModel(model="") { const code=normalizeCode(model); return code ? code.slice(0,-1)+"0" : ""; }
+function clampRepetition(value){ const n=Math.round(Number(value)||1); return Math.min(5,Math.max(1,n)); }
 function toIso(v){ if(!v) return null; if(typeof v.toDate === "function") return v.toDate().toISOString(); if(v instanceof Date) return v.toISOString(); return String(v); }
 function fromDoc(d){
   const x=d.data();
@@ -28,6 +29,7 @@ function fromDoc(d){
     code:x.codigo || x.code || d.id,
     line:x.linha || lineFromModel(x.codigo || x.code || d.id),
     type:x.situacao || x.type || "ESTIMADO",
+    repetition:clampRepetition(x.repeticaoJogoGabarito ?? x.repeticaoGabarito ?? x.repetition),
     origin:x.origem || x.origin || "Manual",
     status:x.publicada === false || x.status === "Rascunho" ? "Rascunho" : "Publicada",
     stages:Array.isArray(x.etapas)?x.etapas:(Array.isArray(x.stages)?x.stages:[]),
@@ -108,6 +110,7 @@ async function saveModel(model,options={}){
     codigo:code,
     linha:model.linha || model.line || lineFromModel(code),
     situacao:model.situacao || model.type || "ESTIMADO",
+    repeticaoJogoGabarito:clampRepetition(model.repeticaoJogoGabarito ?? model.repeticaoGabarito ?? model.repetition),
     origem:model.origem || model.origin || "Manual",
     status:model.status || (model.publicada===false?"Rascunho":"Publicada"),
     publicada:model.publicada ?? (model.status !== "Rascunho"),

@@ -1,0 +1,8 @@
+Catálogo Bordado ADM V4
+- Novo campo "Repetição jogo de gabarito": valores 1 a 5; padrão 1; zero nunca é gravado.
+- Campo disponível no cadastro manual e na atualização.
+- Importações sem esse dado assumem automaticamente 1.
+- Consulta mobile interna mostra a repetição.
+- Menu lateral mantido no desktop e transformado em navegação inferior no mobile.
+- Assinatura discreta "By Paes2005".
+- Cache PWA v6.
